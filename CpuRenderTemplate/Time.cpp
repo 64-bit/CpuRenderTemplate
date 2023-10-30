@@ -13,6 +13,7 @@ Time::Time(bool printFPS, int framesToPrint)
 
 	QueryPerformanceFrequency(&_frequency);
 
+	AverageFrameTime = 0.0f;
 	CurrentFrame = 0;
 	DeltaTime = 0.0f;
 }
