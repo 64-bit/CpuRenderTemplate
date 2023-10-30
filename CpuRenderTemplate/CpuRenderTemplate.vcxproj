@@ -135,8 +135,6 @@
   <ItemGroup>
     <ClCompile Include="CpuRenderTemplate.cpp" />
     <ClCompile Include="FrameDisplayer.cpp" />
-    <ClCompile Include="OpenGL.cpp" />
-    <ClCompile Include="SdlSurface.cpp" />
     <ClCompile Include="Time.cpp" />
   </ItemGroup>
   <ItemGroup>
