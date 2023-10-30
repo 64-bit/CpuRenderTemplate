@@ -1,56 +1,75 @@
-// CpuRenderTemplate.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
 #include <SDL.h>
 #undef main
 
+#include <GL/glew.h>
 #include <iostream>
+#include <Windows.h>
 
-const int WIDTH = 1920, HEIGHT = 1080;
+#include "FrameDisplayer.h"
+#include "GenTexture.h"
+#include "Time.h"
 
+const int width = 1920, height = 1080;
 
-void RunTestSurface(int width, int height, int frames);
-void RunTestOpenGL(int width, int height, int frames);
+bool running = true;
 
+char* textureA;
+char* textureB;
+
+void HandleSDLEvent(SDL_Event e) 
+{
+    if (e.type == SDL_QUIT)
+    {
+        running = false;
+    }
+}
+
+char* DrawFrame(float time, int frame, int width, int height)
+{
+    bool isOdd = frame % 2;
+    return isOdd ? textureA : textureB;
+}
 
 int main(int argc, char** argv)
-{
+{  
     SDL_Init(SDL_INIT_VIDEO);
 
-    RunTestSurface(WIDTH, HEIGHT, 1000);
-    RunTestOpenGL(WIDTH, HEIGHT, 1000);
+    SDL_Window* window = SDL_CreateWindow("OpenGL", 400, 400, width, height, SDL_WINDOW_OPENGL);
+    SDL_GLContext context = SDL_GL_CreateContext(window);
+    glewInit();
 
-    //SDL_Window* window = SDL_CreateWindow("OpenGL", 400, 400, WIDTH, HEIGHT, SDL_WINDOW_OPENGL);
-    //SDL_GLContext context = SDL_GL_CreateContext(window);
+    SDL_GL_SetSwapInterval(0);
 
-    //bool running = true;
-    //while (running)
-    //{
-    //    SDL_Event e;
-    //    while (SDL_PollEvent(&e))
-    //    {
-    //        if (e.type == SDL_QUIT)
-    //        {
-    //            running = false;
-    //        }
-    //    }
+    FrameDisplayer displayer = FrameDisplayer();
 
-    //    SDL_GL_SwapWindow(window);
-    //}
+    textureA = GenerateTexture(width, height, 0);
+    textureB = GenerateTexture(width, height, 1);
 
-    //SDL_GL_DeleteContext(context);
-    //SDL_DestroyWindow(window);
+    Time time = Time(true, 100);
 
+    while(running)
+    {
+        SDL_Event e;
+        while (SDL_PollEvent(&e))
+        {
+            HandleSDLEvent(e);
+        }
+
+        bool isOdd = time.CurrentFrame % 2;
+        char* texture = isOdd ? textureA : textureB;
+
+        //Rendering
+        ///////////////////////////////////////////////
+        texture = DrawFrame(time.DeltaTime, time.CurrentFrame, width, height);
+        displayer.DisplayFrame(width, height, texture);
+
+        SDL_GL_SwapWindow(window);
+        ///////////////////////////////////////////////
+
+        time.OnFrame();
+    }
+
+    SDL_DestroyWindow(window);
     SDL_Quit();
     return 0;
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
